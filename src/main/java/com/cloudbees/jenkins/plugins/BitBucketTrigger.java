@@ -54,15 +54,16 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
         final String pushBy = triggeredByUser;
         getDescriptor().queue.execute(new Runnable() {
             private boolean runPolling() {
+                // TODO: don't know if it is the right way
                 BitBucketPlugin plugin = new BitBucketPlugin();
 
                 try {
                     LOGGER.log(Level.INFO,"Polling from " + pushBy);
 
+                    // TODO: that knabjenkins user is fixed for my needs it should be changed in an array of string
                     if (pushBy.equals("knabjenkins") || pushBy.equals(plugin.getIgnoredUser())) {
                         return false;
                     }
-
 
                     StreamTaskListener listener = new StreamTaskListener(getLogFile());
                     try {
