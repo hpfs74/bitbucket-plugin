@@ -54,13 +54,27 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
         final String pushBy = triggeredByUser;
         getDescriptor().queue.execute(new Runnable() {
             private boolean runPolling() {
+                BitBucketPlugin plugin = new BitBucketPlugin();
+
                 try {
+                    LOGGER.log(Level.INFO,"Polling from " + pushBy);
+
+                    if (pushBy.equals("knabjenkins") || pushBy.equals(plugin.getIgnoredUser())) {
+                        return false;
+                    }
+
+
                     StreamTaskListener listener = new StreamTaskListener(getLogFile());
                     try {
                         PrintStream logger = listener.getLogger();
                         long start = System.currentTimeMillis();
                         logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
-                        boolean result = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job).poll(listener).hasChanges();
+
+                        boolean result = SCMTriggerItem.SCMTriggerItems
+                                .asSCMTriggerItem(job)
+                                .poll(listener)
+                                .hasChanges();
+
                         logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
                         if(result)
                             logger.println("Changes found");
@@ -181,7 +195,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getDisplayName() {
-            return "Build when a change is pushed to BitBucket";
+            return "Build when a change is pushed to BitBucket (KNAB PATCH)";
         }
     }
 
